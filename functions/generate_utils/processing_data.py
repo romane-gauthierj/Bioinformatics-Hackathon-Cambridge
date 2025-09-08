@@ -32,6 +32,7 @@ def preprocessing_data(mrna_data, cnv_data, methyl_data, mirna_data, clinical_da
 
     clinical_data_filtered = clinical_data_filtered.transpose()
 
+
     cols_to_drop = clinical_data_filtered.loc[["days", "status"]].isna().any(axis=0)
 
     clinical_data_filtered = clinical_data_filtered.loc[:, ~cols_to_drop]
@@ -51,6 +52,7 @@ def preprocessing_data(mrna_data, cnv_data, methyl_data, mirna_data, clinical_da
     final_patients_ids = list(set(valid_ids_mran) & set(valid_ids_cnv) & set(valid_ids_methyl) & set(valid_ids_mirna))
 
     clinical_data_filtered = clinical_data_filtered[final_patients_ids]
+    
 
     time = clinical_data_filtered.loc["days"]
     event = clinical_data_filtered.loc["status"]
