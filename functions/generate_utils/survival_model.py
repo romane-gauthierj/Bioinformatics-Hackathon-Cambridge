@@ -1,34 +1,38 @@
+
 from sksurv.linear_model import CoxnetSurvivalAnalysis
 from sksurv.util import Surv
-import numpy as np
+from sklearn.model_selection import train_test_split
+from sksurv.linear_model import CoxnetSurvivalAnalysis
+from sksurv.metrics import concordance_index_censored
 
-# y: structured array with fields ('event', 'time')
-# e.g., y = Surv.from_arrays(event=y_event.astype(bool), time=y_time.astype(float))
+
+def run_CoxnetSurvivalAnalysis(l1_ratio, data_interest, clinical_data_filtered):
+    #l1_ratio = 0.9
+    X = data_interest.T
+
+    time = clinical_data_filtered.loc['days']
+    event = clinical_data_filtered.loc['status']
+
+    Y = Surv.from_arrays(event=event.astype(bool), time=time.astype(float))
+
+    #train test split - 75/25
+    X_train, X_test, y_train, y_test, event_train, event_test, time_train, time_test = train_test_split(
+    X, Y, event, time, test_size=0.25, random_state=42, stratify=event)
 
 
-coxnet = CoxnetSurvivalAnalysis(l1_ratio=0.5).fit(X_train, y_train)
+    # Model Training
+    model = CoxnetSurvivalAnalysis(l1_ratio=l1_ratio, alphas=None)
 
-# 1) Log-risk score (linear predictor). Higher -> riskier.
-risk_score = coxnet.predict(X_test)           # shape (n_test,)
+    # Fit the model to the training data
+    model.fit(X_train, y_train)
 
-# 2) Survival curves S(t|x) as step functions
-s_funcs = coxnet.predict_survival_function(X_test)  # list of StepFunction
 
-# Probability of surviving >= T years for each sample:
-T = 5.0
-p_survive_T = np.array([sf(T) for sf in s_funcs])
+    # Prediction and Evaluation
+    risk_scores = model.predict(X_test)
+    c_index, _, _, _, _ = concordance_index_censored(y_test['event'], y_test['time'], risk_scores)
 
-# Predicted median survival time for each sample:
-def median_survival_from_sf(sf):
-    # find first time t where S(t) <= 0.5
-    t = sf.x                      # times
-    s = sf.y                      # survival values
-    idx = np.where(s <= 0.5)[0]
-    return float(t[idx[0]]) if len(idx) else np.inf  # inf = median not reached
+    perf_score = model.score(X_test, y_test) # evaluate model's performance (C-index), score close to 1 = perfect prediction
 
-median_pred = np.array([median_survival_from_sf(sf) for sf in s_funcs])
+    return risk_scores, c_index, perf_score
 
-# 3) Hazard ratios between two patients i and j:
-i, j = 0, 1
-hazard_ratio_ij = float(np.exp(risk_score[i] - risk_score[j]))
 
