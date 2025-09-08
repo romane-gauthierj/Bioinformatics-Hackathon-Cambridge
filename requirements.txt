@@ -3,5 +3,3 @@ pandas
 matplotlib
 seaborn
 lifelines
-scikit-learn
-scikit-survival

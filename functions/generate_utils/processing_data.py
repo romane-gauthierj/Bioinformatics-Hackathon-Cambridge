@@ -58,9 +58,19 @@ def preprocessing_data(mrna_data, cnv_data, methyl_data, mirna_data, clinical_da
     kmf = KaplanMeierFitter()
     kmf.fit(time, event_observed=event)
 
+
+    # Plot
+    # plt.figure(figsize=(8, 6))
+    # kmf.plot_survival_function(ci_show=True)  # ci_show=True to display confidence interval
+    # plt.title("Kaplan–Meier Survival Curve")
+    # plt.xlabel("Time (days)")
+    # plt.ylabel("Survival probability")
+    # plt.grid(True)
+    # plt.show()
+
     median_survival = kmf.median_survival_time_
 
-    return mrna_data_filtered, cnv_data_filtererd, methyl_data_filtered, mirna_data_filtered, median_survival
+    return clinical_data_filtered, mrna_data_filtered, cnv_data_filtererd, methyl_data_filtered, mirna_data_filtered, median_survival
 
 
 
