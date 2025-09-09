@@ -20,3 +20,10 @@ clinical_data_filtered, mrna_data_filtered, cnv_data_filtererd, methyl_data_filt
 
 # perform survival analysis
 risk_scores, c_index, perf_score = run_CoxnetSurvivalAnalysis(0.9, mirna_data_filtered, clinical_data_filtered)
+
+
+
+
+
+# TODO 
+# add cross validation part; add the scaler 
